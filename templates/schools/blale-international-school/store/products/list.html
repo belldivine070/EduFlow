@@ -1,0 +1,186 @@
+{% extends "schools/default/layout.html" %}
+
+{% block title %}Store &amp; Inventory - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Store &amp; Inventory Management</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage school uniforms, books, stationery, stock quantities, and audit inventory movements.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'store:pos' %}"
+               class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shadow-soft flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span>Point of Sale (POS)</span>
+            </a>
+            <a href="{% url 'store:order_list' %}"
+               class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm">
+                Sales Orders &rarr;
+            </a>
+            <a href="{% url 'store:movement_history' %}"
+               class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm">
+                Stock Audit Trail &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <span class="text-slate-500 text-xs font-bold uppercase tracking-wider block">Total Active Products</span>
+            <div class="text-2xl font-mono font-extrabold text-slate-900 mt-1">{{ total_products }}</div>
+            <span class="text-[11px] text-slate-400 mt-1 block">Catalog items in store</span>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <span class="text-amber-600 text-xs font-bold uppercase tracking-wider block">Low Stock Alert</span>
+            <div class="text-2xl font-mono font-extrabold text-amber-600 mt-1">{{ low_stock_count }}</div>
+            <span class="text-[11px] text-slate-400 mt-1 block">Products below reorder threshold</span>
+        </div>
+    </div>
+
+    <!-- 2 Column Layout: Product Setup & Product Inventory List -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Col 1: Add Category & Add Product -->
+        <div class="space-y-6">
+            <!-- Add Category Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Add Category
+                </h2>
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_category">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Category Name</label>
+                        <input type="text" name="name" required placeholder="e.g. School Uniforms, Textbooks"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition">
+                        Save Category
+                    </button>
+                </form>
+            </div>
+
+            <!-- Add Product Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Add New Product
+                </h2>
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_product">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Category</label>
+                        <select name="category_id" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="">-- Choose Category --</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Product Name</label>
+                        <input type="text" name="name" required placeholder="e.g. JSS Uniform Set (Size 12)"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">SKU Code</label>
+                        <input type="text" name="sku" placeholder="e.g. UNIF-JSS-12"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono uppercase focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Price (₦)</label>
+                            <input type="number" step="0.01" name="price" required placeholder="12500.00"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Initial Qty</label>
+                            <input type="number" name="initial_stock" value="0"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Low Stock Alert Threshold</label>
+                        <input type="number" name="threshold" value="5"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs hover:bg-brand-700 transition shadow-soft">
+                        Save Product
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Col 2 & 3: Product Inventory Table & Adjustments -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Inventory Items ({{ products.count }})</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider font-bold">
+                            <tr>
+                                <th class="py-3 px-4">Product</th>
+                                <th class="py-3 px-4">Category</th>
+                                <th class="py-3 px-4 font-mono">Price (₦)</th>
+                                <th class="py-3 px-4 font-mono">Stock Qty</th>
+                                <th class="py-3 px-4 text-right">Stock Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            {% for prod in products %}
+                                <tr class="hover:bg-slate-50/60 transition">
+                                    <td class="py-3.5 px-4">
+                                        <div class="font-bold text-slate-900">{{ prod.name }}</div>
+                                        {% if prod.sku %}
+                                            <div class="text-[10px] font-mono text-slate-400">SKU: {{ prod.sku }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3.5 px-4 text-slate-500">{{ prod.category.name }}</td>
+                                    <td class="py-3.5 px-4 font-mono font-bold text-slate-900">₦{{ prod.price|floatformat:2 }}</td>
+                                    <td class="py-3.5 px-4">
+                                        {% if prod.stock_quantity <= 0 %}
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Out of Stock (0)</span>
+                                        {% elif prod.is_low_stock %}
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Low: {{ prod.stock_quantity }}</span>
+                                        {% else %}
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">{{ prod.stock_quantity }} in stock</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3.5 px-4 text-right">
+                                        <!-- Inline Adjustment Form -->
+                                        <form method="POST" action="{% url 'store:stock_adjust' pk=prod.id %}" class="inline-flex items-center gap-1.5">
+                                            {% csrf_token %}
+                                            <select name="movement_type" class="px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white">
+                                                <option value="restock">Restock (+)</option>
+                                                <option value="adjustment">Adjust (+/-)</option>
+                                                <option value="damage">Damage (-)</option>
+                                            </select>
+                                            <input type="number" name="quantity_changed" placeholder="Qty" required
+                                                   class="w-16 px-2 py-1 rounded-lg border border-slate-200 text-[11px] font-mono">
+                                            <button type="submit" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-semibold text-[11px] hover:bg-slate-800 transition">
+                                                Apply
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-10 text-center text-slate-400 italic">No products registered in the store catalog.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

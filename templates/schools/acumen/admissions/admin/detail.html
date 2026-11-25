@@ -1,0 +1,265 @@
+{% extends "schools/default/layout.html" %}
+
+{% block title %}Application {{ application.application_number }} - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'admissions:admin_list' %}" class="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-slate-900 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ application.full_name }}</h1>
+                    <span class="font-mono text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-200">
+                        {{ application.application_number }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Applying for <strong>{{ application.applying_for_class.name }}</strong> • Session: <strong>{{ application.session.name }}</strong> • Submitted {{ application.submitted_at|date:"M d, Y" }}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            {% if application.status == 'admitted' or application.status == 'enrolled' %}
+                <a href="{% url 'admissions:letter' pk=application.id %}" target="_blank"
+                   class="px-4 py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-bold hover:bg-emerald-100 transition shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>View Admission Letter</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left 2 Cols: Biodata, Parent, Documents -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Student Biodata Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Applicant Information
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">First Name</span>
+                        <span class="font-semibold text-slate-800">{{ application.first_name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Middle Name</span>
+                        <span class="font-semibold text-slate-800">{{ application.middle_name|default:"—" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Last Name</span>
+                        <span class="font-semibold text-slate-800">{{ application.last_name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Gender</span>
+                        <span class="font-semibold text-slate-800 capitalize">{{ application.gender }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Date of Birth</span>
+                        <span class="font-semibold text-slate-800">{{ application.date_of_birth|date:"M d, Y" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Target Class</span>
+                        <span class="font-semibold text-brand-600">{{ application.applying_for_class.name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">State of Origin</span>
+                        <span class="font-semibold text-slate-800">{{ application.state_of_origin|default:"—" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">LGA of Origin</span>
+                        <span class="font-semibold text-slate-800">{{ application.lga|default:"—" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Previous School</span>
+                        <span class="font-semibold text-slate-800">{{ application.previous_school|default:"—" }}</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-3">
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Residential Address</span>
+                        <span class="font-semibold text-slate-800">{{ application.residential_address|default:"—" }}</span>
+                    </div>
+                    {% if application.medical_conditions %}
+                        <div class="col-span-2 sm:col-span-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                            <span class="text-amber-800 font-bold block text-[10px] uppercase">Medical Conditions &amp; Allergies</span>
+                            <span class="text-xs">{{ application.medical_conditions }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Parent Information Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Parent / Guardian Contact
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Full Name</span>
+                        <span class="font-semibold text-slate-800">{{ application.parent_name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Relationship</span>
+                        <span class="font-semibold text-slate-800">{{ application.parent_relationship }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Phone Number</span>
+                        <span class="font-mono font-semibold text-slate-800">{{ application.parent_phone }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Email Address</span>
+                        <span class="font-semibold text-slate-800">{{ application.parent_email|default:"—" }}</span>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase">Parent Address</span>
+                        <span class="font-semibold text-slate-800">{{ application.parent_address|default:"Same as student residential address" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uploaded Documents Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Attached Documents ({{ application.documents.count }})
+                </h2>
+                <div class="space-y-3">
+                    {% for doc in application.documents.all %}
+                        <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="font-bold text-slate-800 block">{{ doc.get_document_type_display }}</span>
+                                    <span class="text-[10px] text-slate-400 font-mono">{{ doc.original_filename|default:doc.file.name }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ doc.file.url }}" target="_blank"
+                               class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-700 hover:bg-slate-100 transition">
+                                View / Download
+                            </a>
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-400 italic">No supporting documents were uploaded with this application.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Col: Decision & Student Conversion -->
+        <div class="space-y-6">
+            <!-- Review & Decision Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Admission Decision
+                </h2>
+
+                <form method="POST" action="{% url 'admissions:admin_decision' pk=application.id %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            Application Status
+                        </label>
+                        <select name="status" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            {% for s_val, s_label in status_choices %}
+                                <option value="{{ s_val }}" {% if application.status == s_val %}selected{% endif %}>{{ s_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            Interview / Screening Date &amp; Time
+                        </label>
+                        <input type="datetime-local" name="interview_date"
+                               value="{{ application.interview_date|date:'Y-m-d\\TH:i' }}"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <p class="text-[10px] text-slate-400 mt-1">Required if setting status to "Interview Scheduled".</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            Decision Notes / Remarks
+                        </label>
+                        <textarea name="decision_notes" rows="3"
+                                  placeholder="Notes visible to applicant or internal admissions committee..."
+                                  class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">{{ application.decision_notes }}</textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition shadow-sm">
+                        Update Decision
+                    </button>
+                </form>
+            </div>
+
+            <!-- Conversion into Enrolled Student -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">
+                    Student Onboarding
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">
+                    Converts this applicant into an active enrolled student with official institutional ID, student profile, academic enrollment, and linked parent user account.
+                </p>
+
+                {% if application.enrolled_student %}
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-2">
+                        <div class="flex items-center gap-2 font-bold text-emerald-950">
+                            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                            <span>Student Already Enrolled</span>
+                        </div>
+                        <div>
+                            <strong>Student ID:</strong>
+                            <span class="font-mono font-bold">{{ application.enrolled_student.admission_number }}</span>
+                        </div>
+                        <div>
+                            <strong>Enrolled Name:</strong> {{ application.enrolled_student.user.get_full_name }}
+                        </div>
+                        <div class="pt-2">
+                            <a href="{% url 'academics:student_detail' pk=application.enrolled_student.id %}"
+                               class="inline-flex items-center gap-1 font-bold text-emerald-700 hover:text-emerald-800 underline">
+                                Open Student Profile &rarr;
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <form method="POST" action="{% url 'admissions:admin_convert' pk=application.id %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                Assign Class Arm (Optional)
+                            </label>
+                            <select name="class_arm_id" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                <option value="">-- No specific arm (General) --</option>
+                                {% for arm in arms %}
+                                    <option value="{{ arm.id }}">{{ arm.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                                onclick="return confirm('Are you sure you want to convert this applicant into an official enrolled student? This will create login accounts and generate their institutional Student ID.')"
+                                class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition shadow-soft flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                            <span>Convert to Enrolled Student</span>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

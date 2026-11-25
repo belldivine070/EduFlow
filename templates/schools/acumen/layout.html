@@ -1,0 +1,27 @@
+{% extends school_base_template %}
+
+{% block layout %}
+<div class="min-h-full flex flex-col">
+    <!-- Sidebar component (resolves to school's isolated sidebar) -->
+    {% include school_template_dir|add:"/components/sidebar.html" %}
+
+    <!-- Mobile Drawer Overlay Backdrop -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 z-30 bg-slate-900/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300 opacity-0"></div>
+
+    <!-- Main Content Wrapper (offset by sidebar on lg screens) -->
+    <div class="lg:pl-64 flex flex-col flex-1 min-w-0">
+        <!-- Topbar component (resolves to school's isolated topbar) -->
+        {% include school_template_dir|add:"/components/topbar.html" %}
+
+        <!-- Page Main Container -->
+        <main class="flex-1 p-4 lg:p-8 animate-fade-in max-w-7xl w-full mx-auto">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- School Footer -->
+        <footer class="py-4 px-6 border-t border-slate-200/80 text-center text-xs text-slate-400">
+            Powered by <strong class="text-slate-600">EduFlow SaaS</strong> • Secure Nigerian School Management System
+        </footer>
+    </div>
+</div>
+{% endblock %}

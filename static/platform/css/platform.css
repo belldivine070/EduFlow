@@ -1,0 +1,40 @@
+/**
+ * EduFlow SaaS - Platform Developer Control Plane Stylesheet
+ * Location: static/platform/css/platform.css
+ *
+ * Dedicated styling for multi-tenant platform administrators.
+ */
+
+:root {
+    --platform-primary: #3b82f6;
+    --platform-bg: #020617;
+    --platform-card: #0f172a;
+    --platform-border: #1e293b;
+    --platform-text: #f8fafc;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--platform-bg);
+    color: var(--platform-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Platform Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}

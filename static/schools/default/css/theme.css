@@ -1,0 +1,154 @@
+/**
+ * EduFlow SaaS - Default School Theme Stylesheet
+ * Location: static/schools/default/css/theme.css
+ *
+ * This file contains global theme variables, custom scrollbars, and
+ * micro-utility classes for the default school tenant template.
+ * Schools with custom templates have their own static/<school-slug>/css/theme.css.
+ */
+
+:root {
+    /* Brand Accent Colors */
+    --brand-primary: #2563eb;
+    --brand-primary-rgb: 37, 99, 235;
+    --brand-secondary: #f59e0b;
+    --brand-secondary-rgb: 245, 158, 11;
+
+    /* Surface & Background Colors */
+    --bg-body: #f8fafc;
+    --bg-surface: #ffffff;
+
+    /* Typography Colors */
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+
+    /* Border & Divider */
+    --border-subtle: #e2e8f0;
+
+    /* Status Colors */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-info: #3b82f6;
+}
+
+/* Base Body Styling */
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism Frosted Panel Effect */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Dark Mode Glassmorphism Panel */
+.glass-panel-dark {
+    background: rgba(15, 23, 42, 0.80);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* Sleek WebKit Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==========================================================================
+   EduFlow Interactive Animations & Micro-Interactions
+   ========================================================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulseSoft {
+    0%, 100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(1.06);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-soft {
+    animation: pulseSoft 5s ease-in-out infinite;
+}
+
+.animate-stagger > * {
+    opacity: 0;
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.19s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.24s; }
+.animate-stagger > *:nth-child(6) { animation-delay: 0.29s; }
+
+.card-hover-lift {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+}
+
+.card-hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -6px rgba(15, 23, 42, 0.12);
+}
+
+.btn-press {
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-press:active {
+    transform: scale(0.97);
+}
+

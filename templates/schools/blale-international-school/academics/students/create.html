@@ -1,0 +1,217 @@
+{% extends school_layout_template %}
+
+{% block page_title %}Admit New Student{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
+                <a href="{% url 'academics:student_list' %}" class="hover:text-slate-600 transition">Students</a>
+                <span>/</span>
+                <span class="text-brand-600 font-medium">New Admission</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Student Admission &amp; Enrolment</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Register student biodata, assign class &amp; arm, and generate credentials.</p>
+        </div>
+
+        <a href="{% url 'academics:student_list' %}" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition">
+            &larr; Back to Directory
+        </a>
+    </div>
+
+    <!-- Student ID Scheme Banner -->
+    <div class="p-4 rounded-2xl bg-brand-50 border border-brand-100 flex items-start gap-3">
+        <svg class="w-5 h-5 text-brand-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div class="text-xs text-slate-700">
+            <span class="font-bold text-slate-900 block">Automatic Student ID Generation</span>
+            A unique Student ID starting with prefix <code class="font-mono font-bold text-brand-700 bg-brand-100/70 px-1.5 py-0.5 rounded">{{ current_school.student_id_prefix|default:current_school.code|add:"-STD-" }}</code> will be sequentially assigned upon submission. The student can sign into their portal with this ID.
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Section 1: Academic Class Placement -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h2 class="text-sm font-bold text-slate-900">1. Academic Placement</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Select the initial class and session placement for the student.</p>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div>
+                    <label for="id_class" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Class *</label>
+                    <select name="school_class" id="id_class" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        <option value="">Select Class...</option>
+                        {% for c in classes %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="id_arm" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Class Arm (Optional)</label>
+                    <select name="class_arm" id="id_arm" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        <option value="">No Arm Assigned</option>
+                        {% for a in arms %}
+                            <option value="{{ a.id }}">{{ a.school_class.name }} - {{ a.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="id_session" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Academic Session *</label>
+                    <select name="session" id="id_session" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        {% for s in sessions %}
+                            <option value="{{ s.id }}" {% if s == current_session %}selected{% endif %}>
+                                {{ s.name }} {% if s.is_current %}(Current){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Student Biodata -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h2 class="text-sm font-bold text-slate-900">2. Student Biodata</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Personal details of the student.</p>
+            </div>
+
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id_first_name" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">First Name *</label>
+                        <input type="text" name="first_name" id="id_first_name" required placeholder="e.g. Chinedu"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id_last_name" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Last Name / Surname *</label>
+                        <input type="text" name="last_name" id="id_last_name" required placeholder="e.g. Okeke"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Gender *</label>
+                        <div class="flex items-center gap-4 mt-2">
+                            <label class="inline-flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                                <input type="radio" name="gender" value="male" checked class="text-brand-600 focus:ring-brand-500/30">
+                                <span>Male</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                                <input type="radio" name="gender" value="female" class="text-brand-600 focus:ring-brand-500/30">
+                                <span>Female</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="id_dob" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Date of Birth</label>
+                        <input type="date" name="date_of_birth" id="id_dob"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id_blood_group" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Blood Group</label>
+                        <select name="blood_group" id="id_blood_group" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                            <option value="">Not Specified</option>
+                            {% for bg in blood_group_choices %}
+                                <option value="{{ bg.0 }}">{{ bg.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label for="id_genotype" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Genotype</label>
+                        <select name="genotype" id="id_genotype" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                            <option value="">Not Specified</option>
+                            {% for gt in genotype_choices %}
+                                <option value="{{ gt.0 }}">{{ gt.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id_state" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">State of Origin</label>
+                        <input type="text" name="state_of_origin" id="id_state" placeholder="e.g. Lagos"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id_lga" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">LGA of Origin</label>
+                        <input type="text" name="lga" id="id_lga" placeholder="e.g. Ikeja"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="id_address" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Residential Address</label>
+                    <textarea name="residential_address" id="id_address" rows="2" placeholder="e.g. 15 Admiralty Way, Lekki Phase 1, Lagos"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Parent / Guardian / Emergency Contact -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h2 class="text-sm font-bold text-slate-900">3. Parent / Guardian / Emergency Contact</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Primary guardian information for emergencies and school communication.</p>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div>
+                    <label for="id_contact_name" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Guardian Name</label>
+                    <input type="text" name="emergency_contact_name" id="id_contact_name" placeholder="e.g. Mr. Emeka Okeke"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label for="id_contact_phone" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Guardian Phone Number</label>
+                    <input type="text" name="emergency_contact_phone" id="id_contact_phone" placeholder="e.g. +234 803 123 4567"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                </div>
+
+                <div>
+                    <label for="id_relationship" class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">Relationship</label>
+                    <input type="text" name="emergency_contact_relationship" id="id_relationship" placeholder="e.g. Father, Mother, Uncle"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Medical Information -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h2 class="text-sm font-bold text-slate-900">4. Medical &amp; Special Needs Notes</h2>
+                <p class="text-[11px] text-slate-500 mt-0.5">Record allergies, dietary restrictions, or medical alerts.</p>
+            </div>
+
+            <div class="p-6">
+                <textarea name="medical_conditions" rows="2" placeholder="e.g. Asthmatic, allergic to peanuts. Requires inhaler on standby."
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"></textarea>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{% url 'academics:student_list' %}" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-600 transition">
+                Cancel
+            </a>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-soft hover:shadow-glow transition">
+                Admit Student &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

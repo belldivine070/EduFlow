@@ -1,0 +1,175 @@
+{% extends "schools/default/layout.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'finance:invoice_list' %}" class="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-slate-900 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ invoice.invoice_number }}</h1>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full
+                        {% if invoice.status == 'paid' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                        {% elif invoice.status == 'partially_paid' %}bg-blue-50 text-blue-700 border border-blue-200
+                        {% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">{{ invoice.title }} • Due: {{ invoice.due_date|date:"M d, Y"|default:"Not specified" }}</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400 font-mono">Student: <strong class="text-slate-800">{{ invoice.student.user.get_full_name }}</strong> ({{ invoice.student.admission_number }})</span>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <span class="text-slate-500 text-xs font-bold uppercase tracking-wider block">Total Billed</span>
+            <div class="text-2xl font-mono font-extrabold text-slate-900 mt-1">₦{{ invoice.total_amount|floatformat:2 }}</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <span class="text-emerald-600 text-xs font-bold uppercase tracking-wider block">Total Paid</span>
+            <div class="text-2xl font-mono font-extrabold text-emerald-600 mt-1">₦{{ invoice.amount_paid|floatformat:2 }}</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+            <span class="text-amber-600 text-xs font-bold uppercase tracking-wider block">Balance Due</span>
+            <div class="text-2xl font-mono font-extrabold {% if invoice.balance_due > 0 %}text-amber-600{% else %}text-slate-400{% endif %} mt-1">
+                ₦{{ invoice.balance_due|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid: Items + Record Payment -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Col 1 & 2: Line items and Payment History -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Line Items Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-4 border-b border-slate-100">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Fee Breakdown &amp; Line Items</h2>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="py-3 px-4">Item Description</th>
+                            <th class="py-3 px-4 text-right font-mono">Amount (₦)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for item in invoice.items.all %}
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-slate-900">{{ item.description }}</td>
+                                <td class="py-3 px-4 text-right font-mono font-bold text-slate-900">₦{{ item.amount|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="py-4 text-center text-slate-400 italic">No line items.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="bg-slate-50 border-t border-slate-200 font-bold text-xs">
+                        <tr>
+                            <td class="py-3 px-4 text-slate-900 uppercase">Total Invoice Sum</td>
+                            <td class="py-3 px-4 text-right font-mono text-brand-600">₦{{ invoice.total_amount|floatformat:2 }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Payment Transactions Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Payment Transactions ({{ invoice.payments.count }})</h2>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="py-3 px-4">Receipt #</th>
+                            <th class="py-3 px-4">Method</th>
+                            <th class="py-3 px-4">Date</th>
+                            <th class="py-3 px-4 font-mono">Amount (₦)</th>
+                            <th class="py-3 px-4 text-right">Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for pay in invoice.payments.all %}
+                            <tr class="hover:bg-slate-50/60 transition">
+                                <td class="py-3 px-4 font-mono font-bold text-brand-600">{{ pay.receipt_number }}</td>
+                                <td class="py-3 px-4 capitalize">{{ pay.get_method_display }}</td>
+                                <td class="py-3 px-4 text-slate-400 text-[11px]">{{ pay.paid_at|date:"M d, Y @ g:i A" }}</td>
+                                <td class="py-3 px-4 font-mono font-bold text-emerald-600">₦{{ pay.amount|floatformat:2 }}</td>
+                                <td class="py-3 px-4 text-right">
+                                    <a href="{% url 'finance:payment_receipt' pk=pay.id %}" target="_blank"
+                                       class="text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
+                                        Print Receipt &rarr;
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-6 text-center text-slate-400 italic">No payments recorded against this invoice yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Col 3: Record Payment Form -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">
+                    Record Payment
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">Record offline payment (cash, bank transfer, POS) or initiate Paystack gateway verification.</p>
+
+                {% if invoice.status == 'paid' %}
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-center">
+                        ✓ This invoice is fully settled. No outstanding balance due.
+                    </div>
+                {% else %}
+                    <form method="POST" action="{% url 'finance:payment_record' pk=invoice.id %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Payment Amount (₦)</label>
+                            <input type="number" step="0.01" name="amount" required value="{{ invoice.balance_due }}"
+                                   max="{{ invoice.balance_due }}"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-400 mt-1 block">Maximum payable balance: ₦{{ invoice.balance_due|floatformat:2 }}</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Payment Method</label>
+                            <select name="method" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                {% for m_val, m_label in payment_methods %}
+                                    <option value="{{ m_val }}">{{ m_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Transaction Ref / Teller # (Optional)</label>
+                            <input type="text" name="reference" placeholder="e.g. GTB-TRANSFER-992144"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition shadow-soft">
+                            Record Payment &amp; Issue Receipt
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

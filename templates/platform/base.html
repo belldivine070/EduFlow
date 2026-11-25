@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Platform Control Plane • EduFlow SaaS{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/EduFlow_icon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/EduFlow_icon.png' %}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!--
+        Tailwind CSS CDN followed immediately by the platform-specific
+        theme config (custom glow shadow, fonts).
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'platform/js/tailwind.config.js' %}"></script>
+
+    <!-- Platform Control Plane: CSS variables and dark scrollbar -->
+    <link rel="stylesheet" href="{% static 'platform/css/platform.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col">
+
+    <!-- Page Layout (overridden by child templates) -->
+    {% block layout %}{% endblock %}
+
+    <!--
+        Platform JS: modal helpers, alert auto-dismiss.
+        Loaded at the bottom so the DOM is ready.
+    -->
+    <script src="{% static 'platform/js/platform.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

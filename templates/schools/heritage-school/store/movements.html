@@ -1,0 +1,71 @@
+{% extends "schools/default/layout.html" %}
+
+{% block title %}Stock Movements Ledger - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Stock Movement Audit Trail</h1>
+            <p class="text-xs text-slate-500 mt-1">Immutable ledger of every addition, sale, damaged item, and inventory audit correction.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'store:product_list' %}"
+               class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm">
+                &larr; Products &amp; Inventory
+            </a>
+        </div>
+    </div>
+
+    <!-- Movement Ledger Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider font-bold">
+                    <tr>
+                        <th class="py-3 px-4">Timestamp</th>
+                        <th class="py-3 px-4">Product Name</th>
+                        <th class="py-3 px-4">Movement Type</th>
+                        <th class="py-3 px-4 font-mono text-center">Previous Qty</th>
+                        <th class="py-3 px-4 font-mono text-center">Change</th>
+                        <th class="py-3 px-4 font-mono text-center">New Qty</th>
+                        <th class="py-3 px-4">Reason / Notes</th>
+                        <th class="py-3 px-4">Logged By</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for mov in movements %}
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="py-3 px-4 text-slate-400 text-[11px] font-mono">{{ mov.created_at|date:"M d, Y @ g:i A" }}</td>
+                            <td class="py-3 px-4 font-bold text-slate-900">{{ mov.product.name }}</td>
+                            <td class="py-3 px-4">
+                                {% if mov.movement_type == 'restock' %}
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Restock / Supply</span>
+                                {% elif mov.movement_type == 'sale' %}
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Sale</span>
+                                {% elif mov.movement_type == 'damage' %}
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Damaged / Expired</span>
+                                {% else %}
+                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Audit Adjustment</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 font-mono text-center text-slate-500">{{ mov.previous_quantity }}</td>
+                            <td class="py-3 px-4 font-mono font-bold text-center {% if mov.quantity_changed > 0 %}text-emerald-600{% else %}text-rose-600{% endif %}">
+                                {% if mov.quantity_changed > 0 %}+{% endif %}{{ mov.quantity_changed }}
+                            </td>
+                            <td class="py-3 px-4 font-mono font-bold text-center text-slate-900">{{ mov.new_quantity }}</td>
+                            <td class="py-3 px-4 text-slate-600">{{ mov.reason|default:"—" }}</td>
+                            <td class="py-3 px-4 text-slate-400 font-mono text-[11px]">{{ mov.created_by.get_full_name|default:mov.created_by.username|default:"System" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="py-10 text-center text-slate-400 italic">No stock movements recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

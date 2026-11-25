@@ -1,0 +1,316 @@
+<aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
+    <!-- School Brand Header -->
+    <div class="h-16 flex items-center px-6 gap-3 border-b border-slate-800/80 bg-slate-950/40">
+        {% if current_school.logo %}
+            <img src="{{ current_school.logo.url }}" alt="{{ current_school.name }}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-500/30">
+        {% else %}
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center font-bold text-white shadow-glow">
+                {{ current_school.code|default:"EF" }}
+            </div>
+        {% endif %}
+        <div class="flex flex-col min-w-0">
+            <span class="text-sm font-bold text-white tracking-tight truncate">{{ current_school.name|default:"EduFlow" }}</span>
+            <span class="text-[10px] font-medium tracking-wide uppercase text-brand-400 font-mono">{{ current_school.code|default:"PLATFORM" }}</span>
+        </div>
+    </div>
+
+    <!-- Navigation List -->
+    <div class="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        <!-- Main Core Section -->
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Overview</div>
+            <nav class="mt-2 space-y-1">
+                <a href="/dashboard/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if request.path == '/dashboard/' %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if request.path == '/dashboard/' %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span>Dashboard</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Academic & School Operations -->
+        {% if nav_is_teaching_staff or nav_is_admin %}
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Academic Hub</div>
+            <nav class="mt-2 space-y-1">
+
+                {% if nav_is_admin %}
+                <!-- Sessions & Terms -->
+                <a href="{% url 'academics:session_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/academics/sessions' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/academics/sessions' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Sessions &amp; Terms</span>
+                </a>
+
+                <!-- Classes & Arms -->
+                <a href="{% url 'academics:class_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if request.path == '/academics/classes/' %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if request.path == '/academics/classes/' %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>Classes &amp; Arms</span>
+                </a>
+
+                <!-- Subjects & Curriculum -->
+                <a href="{% url 'academics:subject_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/academics/subjects' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/academics/subjects' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <span>Subjects</span>
+                </a>
+
+                <!-- Teaching Assignments -->
+                <a href="{% url 'academics:assignment_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/academics/assignments' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/academics/assignments' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>Teacher Assignments</span>
+                </a>
+
+                <!-- Admissions -->
+                <a href="{% url 'admissions:admin_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/admissions' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/admissions' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    <span>Admissions</span>
+                </a>
+                {% endif %}
+
+                <!-- Students -->
+                <a href="{% url 'academics:student_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/academics/students' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/academics/students' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>Students</span>
+                </a>
+
+                {% if nav_is_admin %}
+                <!-- Staff Directory -->
+                <a href="/staff/"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if request.path == '/staff/' or '/staff/onboard' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if request.path == '/staff/' or '/staff/onboard' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span>Staff Directory</span>
+                </a>
+                {% endif %}
+
+                <!-- Student Attendance -->
+                <a href="{% url 'academics:attendance_register' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/academics/attendance' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/academics/attendance' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    <span>Student Attendance</span>
+                </a>
+
+                {% if nav_is_admin %}
+                <!-- Staff Attendance -->
+                <a href="{% url 'staff:attendance_register' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/staff/attendance' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/staff/attendance' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Staff Attendance</span>
+                </a>
+                {% endif %}
+
+            </nav>
+        </div>
+        {% endif %}
+
+        <!-- Examinations & Assessments -->
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Assessments &amp; Exams</div>
+            <nav class="mt-2 space-y-1">
+                <!-- Continuous Assessments -->
+                <a href="{% url 'assessments:assessment_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/assessments' in request.path and '/assessments/questions' not in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/assessments' in request.path and '/assessments/questions' not in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>CBT &amp; CA Tests</span>
+                </a>
+
+                {% if nav_is_teaching_staff %}
+                <!-- Question Bank -->
+                <a href="{% url 'assessments:question_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/assessments/questions' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/assessments/questions' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Question Bank</span>
+                </a>
+
+                <!-- Score Entry -->
+                <a href="{% url 'examinations:score_entry' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/examinations/scores' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/examinations/scores' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <span>Score Entry</span>
+                </a>
+                {% endif %}
+
+                {% if nav_is_admin %}
+                <!-- Approvals & Publication -->
+                <a href="{% url 'examinations:result_approval' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/examinations/approvals' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/examinations/approvals' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Result Approvals</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <!-- Finance & Accounts -->
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Finance &amp; Bursary</div>
+            <nav class="mt-2 space-y-1">
+                <!-- Fee Invoices -->
+                <a href="{% url 'finance:invoice_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/finance/invoices' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/finance/invoices' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
+                    </svg>
+                    <span>Student Invoices</span>
+                </a>
+
+                {% if nav_is_admin %}
+                <!-- Fee Structures -->
+                <a href="{% url 'finance:fee_structures' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/finance/structures' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/finance/structures' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Fee Structures</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <!-- Store & Inventory -->
+        {% if nav_is_staff %}
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">School Store</div>
+            <nav class="mt-2 space-y-1">
+                <!-- Products -->
+                <a href="{% url 'store:product_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/store/products' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/store/products' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Store Inventory</span>
+                </a>
+
+                <!-- POS -->
+                <a href="{% url 'store:pos' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/store/pos' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/store/pos' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span>Point of Sale (POS)</span>
+                </a>
+
+                <!-- Orders -->
+                <a href="{% url 'store:order_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/store/orders' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/store/orders' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>Store Sales</span>
+                </a>
+            </nav>
+        </div>
+        {% endif %}
+
+        <!-- Administration & Configuration -->
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Communications &amp; Support</div>
+            <nav class="mt-2 space-y-1">
+                <a href="{% url 'communications:announcement_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/communications/announcements' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/communications/announcements' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+                    <span>Announcements</span>
+                </a>
+                <a href="{% url 'communications:notification_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/communications/notifications' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/communications/notifications' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span>Notifications</span>
+                </a>
+                <a href="{% url 'support:ticket_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/support' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/support' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <span>Helpdesk &amp; Support</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Administration & Configuration -->
+        {% if nav_is_admin %}
+        <div>
+            <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Settings</div>
+            <nav class="mt-2 space-y-1">
+                <a href="{% url 'schools:school_settings' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group {% if '/settings/school' in request.path %}bg-brand-600 text-white shadow-soft shadow-brand-600/30 font-semibold{% else %}hover:bg-slate-800/60 hover:text-white text-slate-400{% endif %}">
+                    <svg class="w-5 h-5 {% if '/settings/school' in request.path %}text-white{% else %}text-slate-400 group-hover:text-white{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>School Settings</span>
+                </a>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-4 border-t border-slate-800/80 bg-slate-950/60 flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+            {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="w-9 h-9 rounded-full object-cover">
+            {% else %}
+                <div class="w-9 h-9 rounded-full bg-slate-800 text-blue-400 flex items-center justify-center font-bold text-xs ring-1 ring-slate-700">
+                    {{ request.user.first_name|first|default:"U" }}{{ request.user.last_name|first|default:"" }}
+                </div>
+            {% endif %}
+            <div class="flex flex-col min-w-0">
+                <span class="text-xs font-semibold text-white truncate">{{ request.user.get_full_name|default:request.user.username }}</span>
+                <span class="text-[10px] font-mono text-slate-400 truncate">{{ request.user.username }}</span>
+            </div>
+        </div>
+        <form method="POST" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" title="Sign out" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </button>
+        </form>
+    </div>
+</aside>
+

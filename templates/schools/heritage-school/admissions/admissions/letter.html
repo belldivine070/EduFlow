@@ -1,0 +1,128 @@
+{% extends "schools/default/base.html" %}
+
+{% block title %}Official Admission Letter - {{ application.full_name }} ({{ school.name }}){% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white">
+    <!-- Top Action Bar (Hidden when printing) -->
+    <div class="max-w-4xl mx-auto mb-6 flex items-center justify-between print:hidden">
+        <a href="{% url 'admissions:status' %}" class="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1">
+            &larr; Back to Status Tracker
+        </a>
+        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span>Print Official Letter</span>
+        </button>
+    </div>
+
+    <!-- Printable Dossier Sheet -->
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 p-8 sm:p-14 print:p-0 print:shadow-none print:border-0 print:rounded-none">
+        <!-- School Letterhead Header -->
+        <div class="text-center pb-8 border-b-2 border-slate-900 relative">
+            <div class="w-20 h-20 mx-auto rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center font-extrabold text-2xl border border-brand-200 mb-3 print:border-slate-900">
+                {{ school.code }}
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 uppercase tracking-wide">{{ school.name }}</h1>
+            {% if school.motto %}
+                <p class="text-xs font-serif italic text-slate-600 mt-1">"{{ school.motto }}"</p>
+            {% endif %}
+            <p class="text-[11px] text-slate-500 mt-2 font-mono">
+                Official School Portal • Verified Institutional Document
+            </p>
+        </div>
+
+        <!-- Meta Bar -->
+        <div class="flex items-center justify-between text-xs py-4 border-b border-slate-200 text-slate-600 font-mono">
+            <div>
+                <strong>REF:</strong> {{ application.application_number }}
+            </div>
+            <div>
+                <strong>DATE:</strong> {{ current_date|date:"F j, Y" }}
+            </div>
+        </div>
+
+        <!-- Addressee -->
+        <div class="py-6 text-sm text-slate-800 leading-relaxed space-y-1">
+            <p class="font-bold text-slate-900">To the Parent / Guardian of:</p>
+            <p class="text-base font-extrabold text-brand-700 font-mono">{{ application.full_name }}</p>
+            <p class="text-xs text-slate-600">{{ application.parent_name }} ({{ application.parent_relationship }})</p>
+            <p class="text-xs text-slate-600">{{ application.residential_address|default:"Address on File" }}</p>
+            <p class="text-xs text-slate-600 font-mono">{{ application.parent_phone }}</p>
+        </div>
+
+        <!-- Formal Title -->
+        <div class="text-center py-4">
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 uppercase underline decoration-2 underline-offset-4 tracking-wide">
+                Offer of Provisional Admission ({{ application.session.name }} Academic Session)
+            </h2>
+        </div>
+
+        <!-- Formal Body Text -->
+        <div class="text-sm text-slate-800 leading-relaxed space-y-4 py-4 text-justify">
+            <p>
+                Dear Sir/Madam,
+            </p>
+            <p>
+                Following your application and the successful evaluation of your credentials by the Admissions Committee of <strong>{{ school.name }}</strong>, I am pleased to convey the management's decision to offer your child/ward, <strong class="text-slate-900 uppercase">{{ application.full_name }}</strong>, provisional admission into:
+            </p>
+
+            <!-- Admission Details Box -->
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl my-4 text-xs space-y-2 font-mono">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Admitted Class:</span>
+                    <strong class="text-slate-900 text-sm">{{ application.applying_for_class.name }} ({{ application.applying_for_class.get_section_display }})</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Academic Session:</span>
+                    <strong class="text-slate-900">{{ application.session.name }}</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Application Number:</span>
+                    <strong class="text-slate-900">{{ application.application_number }}</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Official Status:</span>
+                    <span class="text-emerald-700 font-bold uppercase">PROVISIONAL ADMISSION OFFERED</span>
+                </div>
+            </div>
+
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 pt-2">Conditions of Acceptance:</h3>
+            <ol class="list-decimal pl-5 text-xs text-slate-700 space-y-2">
+                <li>
+                    <strong>Acceptance of Offer:</strong> This provisional offer is valid for two (2) weeks from the date of issue. To secure this slot, the acceptance fees and first term tuition must be paid on or before the resumption date.
+                </li>
+                <li>
+                    <strong>Original Verification:</strong> The candidate must present original birth certificate, previous school transfer certificate/continuous assessment records, and medical fitness clearance on resumption day.
+                </li>
+                <li>
+                    <strong>Disciplinary Code:</strong> Admission is subject to strict adherence to the school's code of conduct and high moral standards.
+                </li>
+            </ol>
+
+            <p class="pt-2">
+                On behalf of the Management, Board of Governors, and Staff of <strong>{{ school.name }}</strong>, we congratulate you on this milestone and warmly welcome you to our academic community.
+            </p>
+        </div>
+
+        <!-- Signature Block -->
+        <div class="pt-12 mt-8 border-t border-slate-200 flex items-end justify-between text-xs text-slate-800">
+            <div class="space-y-1">
+                <div class="w-40 border-b border-slate-900 pb-2">
+                    <span class="font-serif italic text-sm text-slate-600 block">Authorized Signature</span>
+                </div>
+                <p class="font-bold uppercase text-slate-900">Registrar / Principal</p>
+                <p class="text-[11px] text-slate-500">{{ school.name }}</p>
+            </div>
+
+            <!-- Official Seal Stamp -->
+            <div class="w-28 h-28 rounded-full border-2 border-dashed border-brand-300 text-brand-600 flex flex-col items-center justify-center text-[9px] uppercase font-bold text-center p-2 leading-tight">
+                <span>Official Seal</span>
+                <span class="text-xs font-mono font-extrabold mt-0.5">{{ school.code }}</span>
+                <span>Admissions Office</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

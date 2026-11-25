@@ -1,0 +1,57 @@
+/**
+ * School Theme Stylesheet
+ * School: heritage-school
+ * Palette: Forest Emerald & Gold
+ * Location: static/schools/heritage-school/css/theme.css
+ */
+:root {
+    --color-brand-50: #f0fdf4;
+    --color-brand-100: #dcfce7;
+    --color-brand-200: #bbf7d0;
+    --color-brand-500: #10b981;
+    --color-brand-600: #065f46;
+    --color-brand-700: #064e3b;
+
+    --color-accent-50: #fefce8;
+    --color-accent-500: #eab308;
+    --color-accent-600: #d97706;
+
+    --color-primary: #065f46;
+    --color-accent: #d97706;
+}
+
+/* Custom scrollbars matching tenant brand */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #10b981;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #065f46;
+}
+
+/* EduFlow Interactive Animations & Micro-Interactions */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseSoft { 0%, 100% { opacity: 0.25; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.06); } }
+.animate-fade-in-up { animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-scale-in { animation: scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-pulse-soft { animation: pulseSoft 5s ease-in-out infinite; }
+.animate-stagger > * { opacity: 0; animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.19s; }
+.card-hover-lift { transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.card-hover-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -6px rgba(15, 23, 42, 0.12); }
+.btn-press { transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
+.btn-press:active { transform: scale(0.97); }

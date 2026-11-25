@@ -1,0 +1,383 @@
+{% extends school_layout_template %}
+
+{% block page_title %}Onboard Staff Member{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl animate-fade-in">
+
+    <!-- Page Header -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-200">
+        <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Onboard New Staff</h2>
+            <p class="text-sm text-slate-500 mt-1">
+                Register a new educator or administrative personnel for <span class="font-semibold text-slate-700">{{ current_school.name }}</span>.
+            </p>
+        </div>
+
+        <a href="{% url 'staff:staff_list' %}"
+           class="inline-flex items-center gap-1.5 px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Directory
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                    {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-200
+                    {% elif message.tags == 'warning' %}bg-amber-50 text-amber-700 border border-amber-200
+                    {% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {% if message.tags == 'error' or message.tags == 'warning' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14A7 7 0 0012 5z"/>
+                        {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        {% endif %}
+                    </svg>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Info Banner regarding Staff ID -->
+    <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/60 flex items-start gap-3.5 text-blue-900 text-xs leading-relaxed">
+        <svg class="w-5 h-5 shrink-0 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+            <strong class="font-bold">Automated Unique Staff ID Generation:</strong>
+            Each staff member is assigned a unique random numeric Staff ID (e.g. <span class="font-mono font-semibold">849201</span>) that serves as their institutional username across EduFlow. The staff member can use either their Staff ID, email address, or mobile number to log in.
+        </div>
+    </div>
+
+    <!-- Onboarding Form -->
+    <form method="POST" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Section 1: Personal Details -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Personal Details</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Basic identity information for the staff member.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-5">
+                    <div>
+                        <label for="id-title" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Title</label>
+                        <select id="id-title" name="title"
+                                class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Mr.">Mr.</option>
+                            <option value="Mrs.">Mrs.</option>
+                            <option value="Miss">Miss</option>
+                            <option value="Dr.">Dr.</option>
+                            <option value="Pastor">Pastor</option>
+                            <option value="Engr.">Engr.</option>
+                            <option value="Alhaji">Alhaji</option>
+                            <option value="Hajia">Hajia</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id-first-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">First Name <span class="text-rose-500">*</span></label>
+                        <input type="text"
+                               id="id-first-name"
+                               name="first_name"
+                               required
+                               placeholder="e.g. Babatunde"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="id-middle-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Middle Name</label>
+                        <input type="text"
+                               id="id-middle-name"
+                               name="middle_name"
+                               placeholder="e.g. Olanrewaju"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="id-last-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Last Name <span class="text-rose-500">*</span></label>
+                        <input type="text"
+                               id="id-last-name"
+                               name="last_name"
+                               required
+                               placeholder="e.g. Adeleke"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-gender" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Gender</label>
+                        <select id="id-gender" name="gender"
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select gender&hellip;</option>
+                            {% for gender_code, gender_label in gender_choices %}
+                                <option value="{{ gender_code }}">{{ gender_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id-address" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Residential Address</label>
+                        <input type="text"
+                               id="id-address"
+                               name="residential_address"
+                               placeholder="e.g. 15 Palm Street, Ikeja, Lagos"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Role & Employment -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Employment &amp; Designation</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Staff institutional role, title, and qualifications.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label for="id-role" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Staff Role <span class="text-rose-500">*</span></label>
+                        <select id="id-role" name="role" required
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {% for role_code, role_label in staff_roles %}
+                                <option value="{{ role_code }}">{{ role_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id-designation" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Designation</label>
+                        <input type="text"
+                               id="id-designation"
+                               name="designation"
+                               placeholder="e.g. Class Teacher, Physics Master"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="id-date-employed" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Employment Date</label>
+                        <input type="date"
+                               id="id-date-employed"
+                               name="date_employed"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label for="id-employment-type" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Employment Type</label>
+                        <select id="id-employment-type" name="employment_type"
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            {% for emp_code, emp_label in employment_types %}
+                                <option value="{{ emp_code }}">{{ emp_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="id-trcn" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">TRCN Number</label>
+                        <input type="text"
+                               id="id-trcn"
+                               name="trcn_number"
+                               placeholder="e.g. LA/T/004921"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono uppercase placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div>
+                        <label for="id-nin" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">National ID (NIN)</label>
+                        <input type="text"
+                               id="id-nin"
+                               name="nin"
+                               maxlength="20"
+                               placeholder="11-digit NIN"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-qualification" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Highest Qualification</label>
+                        <input type="text"
+                               id="id-qualification"
+                               name="qualification"
+                               placeholder="e.g. B.Ed, B.Sc, N.C.E, M.Ed, PGDE"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div>
+                        <label for="id-specialization" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Specialization</label>
+                        <input type="text"
+                               id="id-specialization"
+                               name="specialization"
+                               placeholder="e.g. Mathematics, English Language, Physics"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <!-- Assigned Subjects Multi-Select Dropdown -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Assigned Subjects (Multiple Select)</label>
+                    <div class="relative" data-multiselect data-placeholder="Select subjects this staff teaches...">
+                        <button type="button" data-ms-trigger
+                                class="w-full flex items-center justify-between border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                            <span data-ms-summary class="text-slate-400 truncate">Select subjects this staff teaches...</span>
+                            <svg class="w-4 h-4 text-slate-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div data-ms-panel class="hidden absolute z-30 mt-1.5 w-full bg-white border border-slate-200 rounded-2xl shadow-xl p-3 space-y-2 animate-scale-in">
+                            <input type="text" data-ms-search placeholder="Search available subjects..."
+                                   class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <div class="max-h-48 overflow-y-auto divide-y divide-slate-100">
+                                {% for sub in subjects %}
+                                    <label data-ms-option class="flex items-center gap-2.5 px-2.5 py-2 hover:bg-brand-50/50 rounded-lg cursor-pointer text-xs text-slate-700">
+                                        <input type="checkbox" name="assigned_subjects" value="{{ sub.id }}" data-label="{{ sub.name }}"
+                                               class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                                        <span class="font-medium flex-1">{{ sub.name }}</span>
+                                        <span class="font-mono text-[10px] text-slate-400">{{ sub.code }}</span>
+                                    </label>
+                                {% empty %}
+                                    <div class="px-3 py-4 text-center text-xs text-slate-400">No subjects configured yet. Add subjects under Academic Hub.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2B: Qualification & Credential Documents -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Qualification &amp; Onboarding Documents</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Upload academic certificates (NCE/B.Ed/B.Sc), TRCN license, NYSC certificate, or CV.</p>
+            </div>
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="space-y-3 p-4 rounded-2xl border border-slate-200 bg-slate-50/50">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide">Primary Qualification Document</label>
+                    <select name="qualification_doc_type" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        {% for code, label in doc_types %}
+                            <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="file" name="qualification_doc" data-file-preview="primary-doc-preview" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                           class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                    <p id="primary-doc-preview" class="hidden text-[11px] font-medium text-emerald-700"></p>
+                </div>
+
+                <div class="space-y-3 p-4 rounded-2xl border border-slate-200 bg-slate-50/50">
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide">Secondary Credential (e.g. TRCN / NYSC / CV)</label>
+                    <select name="secondary_doc_type" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        {% for code, label in doc_types %}
+                            <option value="{{ code }}" {% if code == 'trcn_certificate' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="file" name="secondary_doc" data-file-preview="secondary-doc-preview" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                           class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                    <p id="secondary-doc-preview" class="hidden text-[11px] font-medium text-emerald-700"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Contact Channels & Credentials -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Contact &amp; Credentials</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Used by the staff member to log in and receive notifications.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label for="id-email" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Email Address</label>
+                        <input type="email"
+                               id="id-email"
+                               name="email"
+                               placeholder="e.g. staff@school.ng"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Can be used to log in.</span>
+                    </div>
+
+                    <div>
+                        <label for="id-phone" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Phone Number</label>
+                        <input type="text"
+                               id="id-phone"
+                               name="phone_number"
+                               placeholder="e.g. 0803 123 4567"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Can be used to log in.</span>
+                    </div>
+
+                    <div>
+                        <label for="id-password" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Initial Password</label>
+                        <input type="text"
+                               id="id-password"
+                               name="password"
+                               placeholder="Leave empty for default"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Default: EduFlowStaff123!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Next of Kin -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Next of Kin (Emergency Contact)</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Emergency contact details for institutional records.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label for="id-nok-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Next of Kin Name</label>
+                        <input type="text"
+                               id="id-nok-name"
+                               name="next_of_kin_name"
+                               placeholder="e.g. Mrs. Funke Adeleke"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="id-nok-rel" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Relationship</label>
+                        <input type="text"
+                               id="id-nok-rel"
+                               name="next_of_kin_relationship"
+                               placeholder="e.g. Spouse, Sibling, Parent"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="id-nok-phone" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Emergency Phone</label>
+                        <input type="text"
+                               id="id-nok-phone"
+                               name="next_of_kin_phone"
+                               placeholder="e.g. 0802 987 6543"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Bar -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{% url 'staff:staff_list' %}"
+               class="px-5 py-2.5 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl transition">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-soft transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Complete Onboarding
+            </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

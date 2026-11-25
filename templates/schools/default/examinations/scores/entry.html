@@ -1,0 +1,182 @@
+{% extends school_layout_template %}
+
+{% block page_title %}Score Entry (CA &amp; Exam){% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Score Entry (CA &amp; Exam)</h1>
+            <p class="text-xs text-slate-500 mt-1">Record Continuous Assessment (TET: 30%) and Terminal Examination (70%) scores.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 border border-brand-200 text-xs font-semibold">
+                {{ current_session.name }} &bull; {{ current_term.get_name_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Filter Card: Class, Arm & Subject -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-5">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+            <div>
+                <label for="filter_class" class="block text-xs font-semibold text-slate-700 mb-1">Class</label>
+                <select id="filter_class" name="class_id" onchange="this.form.submit()"
+                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    {% for sc in classes %}
+                        <option value="{{ sc.id }}" {% if selected_class and selected_class.id == sc.id %}selected{% endif %}>
+                            {{ sc.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter_arm" class="block text-xs font-semibold text-slate-700 mb-1">Arm (Optional)</label>
+                <select id="filter_arm" name="arm_id" onchange="this.form.submit()"
+                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    <option value="">All Arms</option>
+                    {% if selected_class %}
+                        {% for arm in selected_class.arms.all %}
+                            <option value="{{ arm.id }}" {% if selected_arm and selected_arm.id == arm.id %}selected{% endif %}>
+                                Arm {{ arm.name }}
+                            </option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter_sub" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+                <select id="filter_sub" name="subject_id" onchange="this.form.submit()"
+                    class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    {% for sub in subjects %}
+                        <option value="{{ sub.id }}" {% if selected_subject and selected_subject.id == sub.id %}selected{% endif %}>
+                            {{ sub.name }} ({{ sub.code }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-soft transition">
+                    Load Scoresheet
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scoresheet Form -->
+    {% if selected_class and selected_subject %}
+        <form method="post" action="{% url 'examinations:score_entry' %}">
+            {% csrf_token %}
+            <input type="hidden" name="class_id" value="{{ selected_class.id }}">
+            {% if selected_arm %}<input type="hidden" name="arm_id" value="{{ selected_arm.id }}">{% endif %}
+            <input type="hidden" name="subject_id" value="{{ selected_subject.id }}">
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                            {{ selected_class.name }}{% if selected_arm %} &bull; Arm {{ selected_arm.name }}{% endif %}
+                            &bull; <span class="text-brand-600">{{ selected_subject.name }} ({{ selected_subject.code }})</span>
+                        </h2>
+                        <span class="text-[11px] text-slate-500">{{ student_scores|length }} Enrolled Student(s)</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                        <span>Max CA: <strong>{{ max_ca }}%</strong></span>
+                        <span>Max Exam: <strong>{{ max_exam }}%</strong></span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50/30 text-slate-400 uppercase tracking-wider text-[11px]">
+                                <th class="py-3 px-6 font-bold w-12">#</th>
+                                <th class="py-3 px-6 font-bold">Student Name</th>
+                                <th class="py-3 px-6 font-bold">Admission No.</th>
+                                <th class="py-3 px-6 font-bold text-center w-28">CA ({{ max_ca }}%)</th>
+                                <th class="py-3 px-6 font-bold text-center w-28">Exam ({{ max_exam }}%)</th>
+                                <th class="py-3 px-6 font-bold text-center w-24">Total</th>
+                                <th class="py-3 px-6 font-bold text-center w-16">Grade</th>
+                                <th class="py-3 px-6 font-bold">Teacher Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for row in student_scores %}
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="py-3.5 px-6 font-semibold text-slate-400">
+                                        {{ forloop.counter }}
+                                        <input type="hidden" name="student_ids" value="{{ row.student.id }}">
+                                    </td>
+
+                                    <td class="py-3.5 px-6 font-bold text-slate-900">
+                                        {{ row.student.user.get_full_name }}
+                                    </td>
+
+                                    <td class="py-3.5 px-6 font-mono font-bold text-brand-600">
+                                        {{ row.student.admission_number }}
+                                    </td>
+
+                                    <td class="py-3.5 px-6 text-center">
+                                        <input type="number" step="0.5" min="0" max="{{ max_ca }}"
+                                            name="ca_{{ row.student.id }}" value="{{ row.ca_score }}" placeholder="&mdash;"
+                                            class="w-20 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-center font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                    </td>
+
+                                    <td class="py-3.5 px-6 text-center">
+                                        <input type="number" step="0.5" min="0" max="{{ max_exam }}"
+                                            name="exam_{{ row.student.id }}" value="{{ row.exam_score }}" placeholder="&mdash;"
+                                            class="w-20 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-center font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                    </td>
+
+                                    <td class="py-3.5 px-6 text-center font-bold text-slate-900">
+                                        {{ row.total_score|default:"Pending" }}
+                                    </td>
+
+                                    <td class="py-3.5 px-6 text-center">
+                                        {% if row.grade and row.grade != 'Pending' %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold {% if row.grade == 'A' %}bg-emerald-50 text-emerald-700{% elif row.grade == 'B' %}bg-blue-50 text-blue-700{% elif row.grade == 'C' %}bg-amber-50 text-amber-700{% else %}bg-rose-50 text-rose-700{% endif %}">
+                                                {{ row.grade }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-slate-300">&mdash;</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="py-3.5 px-6">
+                                        <input type="text" name="remarks_{{ row.student.id }}" value="{{ row.remarks }}" placeholder="Optional remarks..."
+                                            class="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="py-12 text-center text-slate-400">
+                                        No students enrolled in this class.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if student_scores %}
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-500">Ensure scores are strictly within configured boundaries (CA &le; {{ max_ca }}, Exam &le; {{ max_exam }}).</span>
+                        <button type="submit"
+                            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-soft hover:shadow-glow transition">
+                            Save Scoresheet
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </form>
+    {% endif %}
+
+</div>
+{% endblock %}

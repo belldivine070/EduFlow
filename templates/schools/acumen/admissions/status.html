@@ -1,0 +1,195 @@
+{% extends "schools/default/base.html" %}
+
+{% block title %}Track Application Status - {{ school.name }}{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- School Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ school.name }}</h1>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">Admission Status Tracker</p>
+        </div>
+
+        <!-- Lookup Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 mb-8">
+            <h2 class="text-base font-bold text-slate-900 mb-2">Check Your Admission Status</h2>
+            <p class="text-xs text-slate-500 mb-6">Enter your Application Reference Number and the Parent Phone Number or Email entered during registration.</p>
+
+            <form method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                        Application Reference Number
+                    </label>
+                    <input type="text" name="application_number" required value="{{ app_number|default:'' }}"
+                           placeholder="e.g. HS-ADM-2026-0001"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono uppercase focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                        Parent Phone or Email
+                    </label>
+                    <input type="text" name="phone_or_email" required value="{{ phone_or_email|default:'' }}"
+                           placeholder="e.g. +2348012345678 or parent@gmail.com"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-2 flex items-center justify-between pt-2">
+                    <a href="{% url 'admissions:apply' %}" class="text-xs text-brand-600 hover:text-brand-700 font-medium">
+                        &larr; New Admission Application
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-700 transition shadow-soft">
+                        Check Status
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Result Card -->
+        {% if application %}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sm:p-8 space-y-6">
+                <!-- Applicant Brief -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                    <div>
+                        <span class="text-[11px] font-mono font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-200">
+                            {{ application.application_number }}
+                        </span>
+                        <h3 class="text-xl font-bold text-slate-900 mt-2">{{ application.full_name }}</h3>
+                        <p class="text-xs text-slate-500">
+                            Applying for <strong class="text-slate-700">{{ application.applying_for_class.name }}</strong> • Session: <span class="font-medium text-slate-700">{{ application.session.name }}</span>
+                        </p>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div>
+                        {% if application.status == 'admitted' or application.status == 'enrolled' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                {{ application.get_status_display }}
+                            </span>
+                        {% elif application.status == 'interview_scheduled' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                {{ application.get_status_display }}
+                            </span>
+                        {% elif application.status == 'rejected' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                {{ application.get_status_display }}
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                {{ application.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Status Progress Pipeline -->
+                <div class="py-4">
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <!-- Step 1 -->
+                        <div class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/50">
+                            <div class="w-6 h-6 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] mb-1">✓</div>
+                            <div class="font-bold text-slate-800">Submitted</div>
+                            <div class="text-[10px] text-slate-400">{{ application.submitted_at|date:"M d, Y" }}</div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="p-3 rounded-xl border {% if application.status != 'pending' %}border-emerald-200 bg-emerald-50/50{% else %}border-slate-200 bg-slate-50{% endif %}">
+                            <div class="w-6 h-6 mx-auto rounded-full {% if application.status != 'pending' %}bg-emerald-600 text-white{% else %}bg-slate-300 text-slate-600{% endif %} flex items-center justify-center font-bold text-[10px] mb-1">
+                                {% if application.status != 'pending' %}✓{% else %}2{% endif %}
+                            </div>
+                            <div class="font-bold text-slate-800">Screening &amp; Review</div>
+                            <div class="text-[10px] text-slate-400">
+                                {% if application.status != 'pending' %}Completed{% else %}In Progress{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="p-3 rounded-xl border {% if application.status in 'admitted,enrolled' %}border-emerald-200 bg-emerald-50/50{% elif application.status == 'rejected' %}border-rose-200 bg-rose-50/50{% else %}border-slate-200 bg-slate-50{% endif %}">
+                            <div class="w-6 h-6 mx-auto rounded-full {% if application.status in 'admitted,enrolled' %}bg-emerald-600 text-white{% elif application.status == 'rejected' %}bg-rose-600 text-white{% else %}bg-slate-300 text-slate-600{% endif %} flex items-center justify-center font-bold text-[10px] mb-1">
+                                {% if application.status in 'admitted,enrolled' %}✓{% elif application.status == 'rejected' %}✕{% else %}3{% endif %}
+                            </div>
+                            <div class="font-bold text-slate-800">Final Decision</div>
+                            <div class="text-[10px] text-slate-400">
+                                {% if application.decision_date %}{{ application.decision_date|date:"M d, Y" }}{% else %}Awaiting{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conditional Action & Notices -->
+                {% if application.status == 'admitted' or application.status == 'enrolled' %}
+                    <div class="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-bold text-emerald-950">Congratulations! Offer of Admission Granted</h4>
+                                <p class="text-xs text-emerald-800 mt-1 leading-relaxed">
+                                    {{ application.full_name }} has been offered provisional admission into <strong>{{ application.applying_for_class.name }}</strong> for the <strong>{{ application.session.name }}</strong> academic session.
+                                </p>
+                                {% if application.decision_notes %}
+                                    <p class="text-xs text-emerald-700 mt-2 bg-white/60 p-3 rounded-lg border border-emerald-100">
+                                        <strong>Notes from Admissions Office:</strong> {{ application.decision_notes }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="mt-4 flex flex-wrap gap-3">
+                                    <a href="{% url 'admissions:letter' pk=application.id %}" target="_blank"
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 text-white font-bold text-xs hover:bg-emerald-800 transition shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <span>View &amp; Print Official Admission Letter</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% elif application.status == 'interview_scheduled' %}
+                    <div class="p-6 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
+                        <h4 class="text-base font-bold text-amber-950">Entrance Assessment / Interview Scheduled</h4>
+                        <p class="text-xs text-amber-800 mt-1">
+                            Your entrance interview has been scheduled for:
+                        </p>
+                        <div class="mt-2 text-sm font-bold text-amber-900 font-mono">
+                            {{ application.interview_date|date:"l, F j, Y @ g:i A"|default:"To be communicated" }}
+                        </div>
+                        {% if application.decision_notes %}
+                            <p class="text-xs text-amber-700 mt-2 bg-white/60 p-3 rounded-lg border border-amber-100">
+                                <strong>Instructions:</strong> {{ application.decision_notes }}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% elif application.status == 'rejected' %}
+                    <div class="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900">
+                        <h4 class="text-base font-bold text-rose-950">Application Status Update</h4>
+                        <p class="text-xs text-rose-800 mt-1 leading-relaxed">
+                            We regret to inform you that we are unable to offer admission for this session due to quota limitations.
+                        </p>
+                        {% if application.decision_notes %}
+                            <p class="text-xs text-rose-700 mt-2 bg-white/60 p-3 rounded-lg border border-rose-100">
+                                <strong>Admissions Office Note:</strong> {{ application.decision_notes }}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="p-6 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900">
+                        <h4 class="text-base font-bold text-blue-950">Application Under Review</h4>
+                        <p class="text-xs text-blue-800 mt-1 leading-relaxed">
+                            Your application is currently being evaluated by the admissions board. You will receive an SMS/email notification once a decision or interview date is assigned.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

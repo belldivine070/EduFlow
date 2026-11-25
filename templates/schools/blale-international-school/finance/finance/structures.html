@@ -1,0 +1,171 @@
+{% extends "schools/default/layout.html" %}
+
+{% block title %}Fee Structures - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Fee Structures &amp; Categories</h1>
+            <p class="text-xs text-slate-500 mt-1">Configure mandatory and optional school fee schedules by academic session, term, and class.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'finance:invoice_list' %}"
+               class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm">
+                View Student Invoices &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- 2 Column Layout: Add Category & Add Structure -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Col 1: Fee Categories List & Create -->
+        <div class="space-y-6">
+            <!-- Add Category Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Add Fee Category
+                </h2>
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_category">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Category Name</label>
+                        <input type="text" name="name" required placeholder="e.g. Tuition, Development Levy, PTA"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Description</label>
+                        <textarea name="description" rows="2" placeholder="Brief note on fee purpose..."
+                                  class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition">
+                        Create Category
+                    </button>
+                </form>
+            </div>
+
+            <!-- Existing Categories -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Active Categories ({{ categories.count }})</h3>
+                <div class="space-y-2">
+                    {% for cat in categories %}
+                        <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between text-xs">
+                            <span class="font-semibold text-slate-800">{{ cat.name }}</span>
+                            <span class="text-[10px] text-slate-400">{{ cat.structures.count }} structures</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-400 italic">No fee categories created yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2 & 3: Configured Fee Structures -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Add Fee Structure Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+                    Configure Class Fee Pricing
+                </h2>
+                <form method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_structure">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Fee Category</label>
+                        <select name="category_id" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="">-- Choose Category --</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Academic Session</label>
+                        <select name="session_id" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            {% for sess in sessions %}
+                                <option value="{{ sess.id }}" {% if sess.is_current %}selected{% endif %}>{{ sess.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Term (Optional)</label>
+                        <select name="term_id" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="">-- All Terms / Full Year --</option>
+                            {% for t in terms %}
+                                <option value="{{ t.id }}">{{ t.display_name }} ({{ t.session.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Target Class</label>
+                        <select name="class_id" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="">-- All Classes (General) --</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}">{{ cls.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Amount (₦)</label>
+                        <input type="number" step="0.01" name="amount" required placeholder="50000.00"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Due Date</label>
+                        <input type="date" name="due_date"
+                               class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-3 pt-2">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs hover:bg-brand-700 transition shadow-soft">
+                            Save Fee Structure
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table of Fee Structures -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Configured Fee Rules ({{ structures.count }})</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider font-bold">
+                            <tr>
+                                <th class="py-3 px-4">Category</th>
+                                <th class="py-3 px-4">Session</th>
+                                <th class="py-3 px-4">Term</th>
+                                <th class="py-3 px-4">Class</th>
+                                <th class="py-3 px-4 font-mono">Amount (₦)</th>
+                                <th class="py-3 px-4">Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            {% for struct in structures %}
+                                <tr class="hover:bg-slate-50/60 transition">
+                                    <td class="py-3 px-4 font-bold text-slate-900">{{ struct.category.name }}</td>
+                                    <td class="py-3 px-4">{{ struct.session.name }}</td>
+                                    <td class="py-3 px-4">{{ struct.term.display_name|default:"Full Session" }}</td>
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex px-2 py-0.5 rounded-md bg-slate-100 font-medium text-slate-800">
+                                            {{ struct.school_class.name|default:"All Classes" }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 font-mono font-bold text-brand-600">₦{{ struct.amount|floatformat:2 }}</td>
+                                    <td class="py-3 px-4 text-slate-400 text-[11px]">{{ struct.due_date|date:"M d, Y"|default:"—" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-8 text-center text-slate-400 italic">No fee structures configured yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

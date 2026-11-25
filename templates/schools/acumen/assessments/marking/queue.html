@@ -1,0 +1,75 @@
+{% extends school_layout_template %}
+
+{% block page_title %}Mark Essay Submission{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a href="{% url 'assessments:assessment_detail' submission.assessment.id %}" class="text-xs font-semibold text-brand-600 hover:underline">&larr; Back to Assessment</a>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 mt-1">Manual Marking Queue</h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Student: <strong class="text-slate-800">{{ submission.student.user.get_full_name }}</strong> ({{ submission.student.admission_number }}) &bull; {{ submission.assessment.title }}
+            </p>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Auto-marked Score</span>
+            <span class="text-base font-extrabold text-slate-900">{{ submission.auto_marked_score }}</span>
+        </div>
+    </div>
+
+    <!-- Essay Questions to Mark -->
+    <div class="space-y-6">
+        {% for ans in essay_answers %}
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <span class="text-xs font-bold text-slate-800">Question {{ forloop.counter }}</span>
+                    <span class="text-[11px] font-semibold text-slate-500">Marks Awarded: <strong class="text-slate-900">{{ ans.marks_awarded }}</strong></span>
+                </div>
+
+                <div class="text-sm font-semibold text-slate-900">
+                    {{ ans.question.prompt }}
+                </div>
+
+                <!-- Student's written answer -->
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block">Student Response:</span>
+                    <p class="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">{{ ans.essay_response|default:"[No response provided]" }}</p>
+                </div>
+
+                <!-- Teacher marking form -->
+                <form method="post" action="{% url 'assessments:marking_queue' submission.id %}" class="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                    {% csrf_token %}
+                    <input type="hidden" name="answer_id" value="{{ ans.id }}">
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Score Awarded</label>
+                        <input type="number" step="0.5" name="marks" value="{{ ans.marks_awarded }}" required
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Feedback / Remarks</label>
+                        <input type="text" name="feedback" value="{{ ans.feedback }}" placeholder="Optional feedback for student..."
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    </div>
+
+                    <div>
+                        <button type="submit"
+                            class="w-full py-2 px-4 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-soft transition">
+                            Save Grade
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {% empty %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+                No essay answers require manual marking in this submission.
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

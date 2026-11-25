@@ -1,0 +1,64 @@
+{% extends "schools/default/base.html" %}
+
+{% block title %}Application Submitted - {{ school.name }}{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-sm border border-slate-200/80 p-8 sm:p-10 text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 mx-auto bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-emerald-100">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">Application Submitted!</h1>
+        <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+            Thank you for applying to <strong class="text-slate-800">{{ school.name }}</strong>. Your admission dossier has been safely received by the admissions office.
+        </p>
+
+        <!-- Reference Box -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 mb-8 text-center">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Your Application Reference Number</span>
+            <span class="text-2xl sm:text-3xl font-mono font-extrabold text-brand-600 select-all tracking-wider">
+                {{ application_number|default:"ADM-RECEIVED" }}
+            </span>
+            <p class="text-xs text-slate-500 mt-2">
+                Please keep this reference number safe. You will need it and your phone number to check admission status and access your admission letter.
+            </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="text-left bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-8 text-xs text-slate-600 space-y-2">
+            <div class="font-bold text-slate-800 uppercase tracking-wide">What happens next?</div>
+            <div class="flex items-start gap-2">
+                <span class="text-blue-600 font-bold">1.</span>
+                <span>Our admissions board reviews your application details and academic background.</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="text-blue-600 font-bold">2.</span>
+                <span>If required, an entrance assessment / interview schedule will be posted to your portal.</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <span class="text-blue-600 font-bold">3.</span>
+                <span>Upon successful review, your official Provisional Admission Letter will be published here.</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{% url 'admissions:status' %}"
+               class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-700 transition shadow-soft flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <span>Track Application Status</span>
+            </a>
+            <a href="{% url 'admissions:apply' %}"
+               class="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition">
+                Submit Another Application
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

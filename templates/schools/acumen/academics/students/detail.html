@@ -1,0 +1,215 @@
+{% extends school_layout_template %}
+
+{% block page_title %}{{ student.user.get_full_name }} • Student Dossier{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+
+    <!-- Header & Breadcrumbs -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
+                <a href="{% url 'academics:student_list' %}" class="hover:text-slate-600 transition">Students</a>
+                <span>/</span>
+                <span class="text-brand-600 font-medium">{{ student.admission_number }}</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+                <span>{{ student.user.get_full_name }}</span>
+                {% if student.is_active %}
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Active Student</span>
+                {% else %}
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Inactive</span>
+                {% endif %}
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Institutional ID: <span class="font-mono font-bold text-brand-600">{{ student.admission_number }}</span> • Admitted {{ student.admission_date|date:"F j, Y" }}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'academics:student_list' %}" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition">
+                &larr; Back to Directory
+            </a>
+            <form method="POST" action="{% url 'academics:student_toggle_status' student.id %}">
+                {% csrf_token %}
+                <button type="submit" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold transition {% if student.is_active %}text-rose-600 hover:border-rose-300{% else %}text-emerald-600 hover:border-emerald-300{% endif %}">
+                    {% if student.is_active %}Deactivate Account{% else %}Activate Account{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Highlight Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-soft">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center font-bold text-white text-2xl shadow-glow shrink-0">
+                {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+            </div>
+
+            <div class="flex-1 space-y-2">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h2 class="text-xl font-bold text-slate-900">{{ student.user.get_full_name }}</h2>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-mono text-xs font-bold">
+                        {{ student.admission_number }}
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        <span>Current Class: <strong class="text-slate-800">{{ current_enrollment.school_class.name|default:"Unassigned" }}{% if current_enrollment.class_arm %} ({{ current_enrollment.class_arm.name }}){% endif %}</strong></span>
+                    </span>
+
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Session: <strong class="text-slate-800">{{ current_enrollment.session.name|default:"None" }}</strong></span>
+                    </span>
+
+                    <span class="flex items-center gap-1.5 capitalize">
+                        <span>Gender: <strong class="text-slate-800">{{ student.gender }}</strong></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1 & 2: Biodata & Enrolment History -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- Biodata Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <h3 class="text-sm font-bold text-slate-900">Student Biodata</h3>
+                </div>
+                <div class="p-6 grid grid-cols-2 sm:grid-cols-3 gap-5 text-xs">
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Date of Birth</span>
+                        <span class="font-semibold text-slate-800">{{ student.date_of_birth|date:"F j, Y"|default:"Not specified" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Gender</span>
+                        <span class="font-semibold text-slate-800 capitalize">{{ student.gender }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Blood Group</span>
+                        <span class="font-semibold text-slate-800">{{ student.blood_group|default:"Not specified" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Genotype</span>
+                        <span class="font-semibold text-slate-800">{{ student.genotype|default:"Not specified" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">State of Origin</span>
+                        <span class="font-semibold text-slate-800">{{ student.state_of_origin|default:"Not specified" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">LGA of Origin</span>
+                        <span class="font-semibold text-slate-800">{{ student.lga|default:"Not specified" }}</span>
+                    </div>
+
+                    <div class="col-span-2 sm:col-span-3">
+                        <span class="text-slate-400 block mb-0.5">Residential Address</span>
+                        <span class="font-semibold text-slate-800">{{ student.residential_address|default:"Not provided" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollment History Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-900">Academic Enrolment History</h3>
+                    <span class="text-xs text-slate-500">{{ enrollments|length }} Session(s)</span>
+                </div>
+                <div class="divide-y divide-slate-100 text-xs">
+                    {% for enr in enrollments %}
+                        <div class="p-4 sm:px-6 flex items-center justify-between hover:bg-slate-50/60 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center font-bold">
+                                    {{ enr.school_class.name|slice:":2" }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-900">
+                                        {{ enr.school_class.name }}
+                                        {% if enr.class_arm %}<span class="text-brand-600 font-mono">({{ enr.class_arm.name }})</span>{% endif %}
+                                    </div>
+                                    <div class="text-[11px] text-slate-400">
+                                        Academic Session: <span class="font-medium text-slate-600">{{ enr.session.name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {% if enr.status == 'active' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-slate-100 text-slate-600{% endif %} capitalize">
+                                    {{ enr.status }}
+                                </span>
+                                <div class="text-[10px] text-slate-400 mt-0.5">Enrolled {{ enr.enrolled_at|date:"M Y" }}</div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="p-6 text-center text-slate-400">
+                            No session enrollment records found.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Guardian & Medical Alerts -->
+        <div class="space-y-6">
+
+            <!-- Guardian / Parent Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <h3 class="text-sm font-bold text-slate-900">Parent / Guardian Contact</h3>
+                </div>
+                <div class="p-6 space-y-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Primary Contact Name</span>
+                        <span class="font-bold text-slate-900 text-sm">{{ student.emergency_contact_name|default:"Not provided" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Relationship to Student</span>
+                        <span class="font-semibold text-slate-800">{{ student.emergency_contact_relationship|default:"Guardian" }}</span>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Telephone Number</span>
+                        {% if student.emergency_contact_phone %}
+                            <a href="tel:{{ student.emergency_contact_phone }}" class="font-mono font-bold text-brand-600 hover:text-brand-500 transition block">
+                                {{ student.emergency_contact_phone }}
+                            </a>
+                        {% else %}
+                            <span class="text-slate-400 italic">None recorded</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <h3 class="text-sm font-bold text-slate-900">Medical Notes</h3>
+                </div>
+                <div class="p-6 text-xs">
+                    {% if student.medical_conditions %}
+                        <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 leading-relaxed">
+                            {{ student.medical_conditions }}
+                        </div>
+                    {% else %}
+                        <p class="text-slate-400 italic">No medical conditions or special alerts registered.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

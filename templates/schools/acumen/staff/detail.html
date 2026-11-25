@@ -1,0 +1,146 @@
+{% extends school_layout_template %}
+
+{% block page_title %}{{ staff_user.get_full_name }} &bull; Staff Profile{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl animate-fade-in">
+
+    <!-- Top Action Bar -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-200">
+        <a href="{% url 'staff:staff_list' %}"
+           class="inline-flex items-center gap-1.5 px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Directory
+        </a>
+
+        {% if can_manage_staff and staff_user != request.user %}
+            <form method="POST" action="{% url 'staff:staff_toggle_status' membership.id %}">
+                {% csrf_token %}
+                {% if membership.status == 'active' %}
+                    <button type="submit"
+                            class="px-4 py-2 border border-rose-200 bg-white hover:bg-rose-50 text-rose-700 text-xs font-semibold rounded-xl transition shadow-sm">
+                        Deactivate Membership
+                    </button>
+                {% else %}
+                    <button type="submit"
+                            class="px-4 py-2 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl transition shadow-sm">
+                        Activate Membership
+                    </button>
+                {% endif %}
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Staff Header Card -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-2xl flex items-center justify-center shadow-glow shrink-0">
+                {{ staff_user.first_name|first|default:"S" }}{{ staff_user.last_name|first|default:"" }}
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h2 class="text-2xl font-black text-slate-900">{{ staff_user.get_full_name }}</h2>
+                    {% if profile.title %}
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">({{ profile.title }})</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 mt-2 flex-wrap">
+                    <span class="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700">
+                        Staff ID: {{ staff_user.username }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide
+                        {% if membership.role == 'director' or membership.role == 'principal' %}bg-purple-100 text-purple-700
+                        {% elif membership.role == 'teaching_staff' %}bg-blue-100 text-blue-700
+                        {% else %}bg-amber-100 text-amber-700{% endif %}">
+                        {{ membership.get_role_display }}
+                    </span>
+                    {% if membership.status == 'active' %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wide">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wide">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Employment & Professional Card -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-soft space-y-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3">Employment &amp; Roles</h3>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <span class="text-xs text-slate-400 block">Designation</span>
+                    <span class="font-semibold text-slate-800">{{ profile.designation|default:"Staff Member" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Date Employed</span>
+                    <span class="font-semibold text-slate-800">{{ profile.date_employed|date:"F d, Y"|default:"Not specified" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Highest Qualification</span>
+                    <span class="font-semibold text-slate-800">{{ profile.qualification|default:"Not specified" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Subject / Specialization</span>
+                    <span class="font-semibold text-slate-800">{{ profile.specialization|default:"Not specified" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Channels Card -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-soft space-y-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3">Contact Information</h3>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <span class="text-xs text-slate-400 block">Email Address</span>
+                    <span class="font-semibold text-slate-800">{{ staff_user.email|default:"No email registered" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Phone Number</span>
+                    <span class="font-semibold text-slate-800 font-mono">{{ staff_user.phone_number|default:"No phone registered" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Residential Address</span>
+                    <span class="font-semibold text-slate-800">{{ profile.residential_address|default:"Not specified" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Gender</span>
+                    <span class="font-semibold text-slate-800">{{ profile.get_gender_display|default:"Not specified" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next of Kin Card -->
+        <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-soft space-y-4 md:col-span-2">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3">Next of Kin &amp; Emergency Contact</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="text-xs text-slate-400 block">Full Name</span>
+                    <span class="font-semibold text-slate-800">{{ profile.next_of_kin_name|default:"Not specified" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Relationship</span>
+                    <span class="font-semibold text-slate-800">{{ profile.next_of_kin_relationship|default:"Not specified" }}</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-400 block">Emergency Phone</span>
+                    <span class="font-semibold text-slate-800 font-mono">{{ profile.next_of_kin_phone|default:"Not specified" }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

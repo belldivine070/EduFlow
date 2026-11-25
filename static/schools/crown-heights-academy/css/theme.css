@@ -1,0 +1,40 @@
+/**
+ * School Theme Stylesheet
+ * School: crown-heights-academy
+ * Palette: Sapphire Blue & Amber
+ * Location: static/schools/crown-heights-academy/css/theme.css
+ */
+:root {
+    --color-brand-50: #eff6ff;
+    --color-brand-100: #dbeafe;
+    --color-brand-200: #bfdbfe;
+    --color-brand-500: #3b82f6;
+    --color-brand-600: #2563eb;
+    --color-brand-700: #1d4ed8;
+
+    --color-accent-50: #fffbeb;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+
+    --color-primary: #2563eb;
+    --color-accent: #f59e0b;
+}
+
+/* Custom scrollbars matching tenant brand */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2563eb;
+}

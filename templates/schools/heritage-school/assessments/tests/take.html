@@ -1,0 +1,84 @@
+{% extends school_layout_template %}
+
+{% block page_title %}{{ assessment.title }} - CBT Test{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- CBT Test Top Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                {{ assessment.subject.code }} &bull; {{ assessment.school_class.name }}
+            </span>
+            <h1 class="text-xl font-bold text-slate-900 mt-1">{{ assessment.title }}</h1>
+            <p class="text-xs text-slate-500 mt-0.5">{{ assessment.instructions|default:"Answer all questions carefully." }}</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="px-4 py-2 rounded-xl bg-slate-900 text-white text-center">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Marks</span>
+                <span class="text-base font-extrabold">{{ assessment.total_marks }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CBT Questions Form -->
+    <form method="post" action="{% url 'assessments:assessment_take' assessment.id %}" class="space-y-6">
+        {% csrf_token %}
+
+        {% for aq in questions %}
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+                            {{ aq.order }}
+                        </span>
+                        <span class="text-xs font-bold text-slate-700">Question {{ aq.order }}</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">
+                        {{ aq.marks }} Mark(s)
+                    </span>
+                </div>
+
+                <div class="text-sm font-semibold text-slate-900 leading-relaxed">
+                    {{ aq.question.prompt }}
+                </div>
+
+                <!-- Multiple Choice or True/False Options -->
+                {% if aq.question.question_type in 'multiple_choicetrue_false' %}
+                    <div class="space-y-2 pt-2">
+                        {% for opt in aq.question.options.all %}
+                            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-brand-500/50 hover:bg-slate-50/50 cursor-pointer transition">
+                                <input type="radio" name="q_{{ aq.question.id }}" value="{{ opt.id }}"
+                                    class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                                <span class="text-xs font-medium text-slate-800">{{ opt.option_text }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% elif aq.question.question_type == 'essay' %}
+                    <div class="pt-2">
+                        <textarea name="q_{{ aq.question.id }}" rows="5" placeholder="Type your answer here..."
+                            class="w-full text-xs p-3.5 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"></textarea>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+                This assessment has no questions configured yet.
+            </div>
+        {% endfor %}
+
+        {% if questions %}
+            <div class="flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-200 shadow-soft">
+                <span class="text-xs text-slate-500 font-medium">Please review all your answers before submitting.</span>
+                <button type="submit" onclick="return confirm('Are you sure you want to finalize and submit this assessment?')"
+                    class="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-soft hover:shadow-glow transition">
+                    Submit Assessment
+                </button>
+            </div>
+        {% endif %}
+    </form>
+
+</div>
+{% endblock %}

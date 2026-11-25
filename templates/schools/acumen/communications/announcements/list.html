@@ -1,0 +1,105 @@
+{% extends school_layout_template %}
+
+{% block title %}School Announcements - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">School Announcements</h1>
+            <p class="text-sm text-slate-500 mt-1">Official circulars, academic notices, and institutional bulletins.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'communications:notification_list' %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 shadow-sm transition">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                My Notifications
+            </a>
+            {% if is_staff %}
+            <a href="{% url 'communications:announcement_create' %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Broadcast Notice
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    {% if is_staff %}
+    <form method="GET" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-wrap gap-4 items-center">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Filter by Audience</label>
+            <select name="audience" class="w-full text-sm border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-slate-50 py-2 px-3">
+                <option value="">All Audiences</option>
+                {% for code, label in audience_choices %}
+                    <option value="{{ code }}" {% if audience_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Message Type</label>
+            <select name="type" class="w-full text-sm border-slate-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-slate-50 py-2 px-3">
+                <option value="">All Types</option>
+                {% for code, label in message_type_choices %}
+                    <option value="{{ code }}" {% if type_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end gap-2 pt-5">
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-slate-800 rounded-xl hover:bg-slate-900 transition">Filter</button>
+            {% if audience_filter or type_filter %}
+                <a href="{% url 'communications:announcement_list' %}" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- Announcements Feed -->
+    <div class="space-y-4">
+        {% for announcement in announcements %}
+        <article class="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                        {% if announcement.message_type == 'alert' %}bg-rose-100 text-rose-800
+                        {% elif announcement.message_type == 'event' %}bg-purple-100 text-purple-800
+                        {% elif announcement.message_type == 'reminder' %}bg-amber-100 text-amber-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ announcement.get_message_type_display }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                        Audience: {{ announcement.get_target_audience_display }}
+                    </span>
+                </div>
+                <div class="text-xs text-slate-400">
+                    {{ announcement.published_at|date:"M d, Y • h:i A" }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h2 class="text-lg font-bold text-slate-900">{{ announcement.title }}</h2>
+                <div class="mt-2 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                    {{ announcement.content }}
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
+                <div class="flex items-center gap-2">
+                    <span class="font-medium text-slate-600">Issued by:</span>
+                    <span>{{ announcement.created_by.get_full_name|default:announcement.created_by.username|default:"Administration" }}</span>
+                </div>
+                <div>
+                    Channel: {{ announcement.get_channel_display }}
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="p-12 text-center bg-white border border-dashed border-slate-300 rounded-2xl">
+            <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+            <h3 class="text-sm font-semibold text-slate-700">No Announcements Found</h3>
+            <p class="text-xs text-slate-400 mt-1">There are currently no active announcements matching your query.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends school_layout_template %}
+{% load static %}
+
+{% block page_title %}School Settings{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-5xl">
+
+    <!-- =====================================================================
+         Page Header
+    ====================================================================== -->
+    <div>
+        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">School Settings</h2>
+        <p class="mt-1 text-sm text-slate-500">Configure your school profile, branding, contact channels, and academic weighting.</p>
+    </div>
+
+    <!-- =====================================================================
+         Flash Messages
+    ====================================================================== -->
+    {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                    {% if message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-200
+                    {% elif message.tags == 'warning' %}bg-amber-50 text-amber-700 border border-amber-200
+                    {% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {% if message.tags == 'error' or message.tags == 'warning' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14A7 7 0 0012 5z"/>
+                        {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        {% endif %}
+                    </svg>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- =====================================================================
+         Settings Form
+    ====================================================================== -->
+    <form method="POST" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Section 1: General Information -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">General Information</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Basic identity information for your school tenant.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">School Name</label>
+                        <input type="text"
+                               value="{{ current_school.name }}"
+                               disabled
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-100 text-slate-500 cursor-not-allowed">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Official name registered on platform. Contact platform support to change.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">School Code</label>
+                        <input type="text"
+                               value="{{ current_school.code }}"
+                               disabled
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-100 text-slate-500 font-mono cursor-not-allowed">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Short system identifier used across tenant records.</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-motto" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">School Motto</label>
+                        <input type="text"
+                               id="id-motto"
+                               name="motto"
+                               value="{{ school_motto }}"
+                               placeholder="e.g. Excellence and Integrity"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id-student-prefix" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Student ID Prefix</label>
+                        <input type="text"
+                               id="id-student-prefix"
+                               name="student_id_prefix"
+                               value="{{ student_id_prefix }}"
+                               placeholder="e.g. KHA/2026/ or GS-STD-"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono uppercase placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Prefix applied to new student registrations.</span>
+                    </div>
+                </div>
+
+                <!-- Logo Upload -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">School Logo</label>
+                    <div class="flex items-center gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                            {% if current_school.logo %}
+                                <img src="{{ current_school.logo.url }}" alt="{{ current_school.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <span class="text-sm font-bold text-slate-400">{{ current_school.code }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <input type="file"
+                                   name="logo"
+                                   accept="image/*"
+                                   class="text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                            <span class="text-[11px] text-slate-400 mt-1 block">PNG, JPG or WEBP up to 2MB. Stored in media/public/.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact & Official Address -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Contact &amp; Address</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Public and administrative contact channels.</p>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-official-email" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Official Email</label>
+                        <input type="email"
+                               id="id-official-email"
+                               name="official_email"
+                               value="{{ official_email }}"
+                               placeholder="info@yourschool.ng"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id-admission-email" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Admissions Email</label>
+                        <input type="email"
+                               id="id-admission-email"
+                               name="admission_email"
+                               value="{{ admission_email }}"
+                               placeholder="admissions@yourschool.ng"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-official-phone" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Official Phone</label>
+                        <input type="text"
+                               id="id-official-phone"
+                               name="official_phone"
+                               value="{{ official_phone }}"
+                               placeholder="e.g. +234 803 000 0000"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+
+                    <div>
+                        <label for="id-contact-person" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Principal Contact Person</label>
+                        <input type="text"
+                               id="id-contact-person"
+                               name="contact_person"
+                               value="{{ contact_person }}"
+                               placeholder="e.g. Mrs. Funke Adeleke"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="id-school-address" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">School Physical Address</label>
+                    <textarea id="id-school-address"
+                              name="school_address"
+                              rows="2"
+                              placeholder="e.g. Plot 14, Victoria Island Extension, Lagos, Nigeria"
+                              class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">{{ school_address }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Academic Assessment Weighting -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+                <h3 class="text-base font-bold text-slate-900">Assessment &amp; Grading Weights</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Nigerian academic assessment weighting. Continuous Assessment (TET) and Exam must total 100%.</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label for="id-tet-weight" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Continuous Assessment / TET Weight (%)</label>
+                        <input type="number"
+                               id="id-tet-weight"
+                               name="tet_weight"
+                               min="0"
+                               max="100"
+                               value="{{ tet_weight }}"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Default: 30% continuous assessment.</span>
+                    </div>
+
+                    <div>
+                        <label for="id-exam-weight" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Examination Weight (%)</label>
+                        <input type="number"
+                               id="id-exam-weight"
+                               name="exam_weight"
+                               min="0"
+                               max="100"
+                               value="{{ exam_weight }}"
+                               class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <span class="text-[11px] text-slate-400 mt-1 block">Default: 70% final examination.</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-700 flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Sum of TET Weight + Exam Weight must equal 100%.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button Bar -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-soft transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Save Settings
+            </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

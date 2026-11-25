@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{{ current_school.name|default:"EduFlow" }}{% endblock %}</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans (UI) + JetBrains Mono (code/IDs) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!--
+        Tailwind CSS CDN (Play CDN for dynamic utility generation).
+        tailwind.config.js MUST be loaded immediately after — before the DOM renders —
+        so Tailwind picks up the custom theme tokens on the first pass.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static school_tailwind_config_js %}"></script>
+
+    <!-- School Theme: CSS variables, scrollbar, body base styles -->
+    <link rel="stylesheet" href="{% static school_theme_css %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
+
+    <!-- Global Toast Notifications Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full">
+        {% if messages %}
+            {% for message in messages %}
+                <!--
+                    Toast colour is driven entirely by Tailwind utility classes.
+                    Tags: 'error' | 'success' | 'warning' | (default = info/blue)
+                -->
+                <div class="toast-item pointer-events-auto flex items-start p-4 rounded-xl shadow-lg border text-sm animate-slide-in
+                    {% if message.tags == 'error' %}
+                        bg-rose-50 border-rose-200 text-rose-900
+                    {% elif message.tags == 'success' %}
+                        bg-emerald-50 border-emerald-200 text-emerald-900
+                    {% elif message.tags == 'warning' %}
+                        bg-amber-50 border-amber-200 text-amber-900
+                    {% else %}
+                        bg-white border-slate-200 text-slate-800
+                    {% endif %}">
+
+                    <!-- Icon Column -->
+                    <div class="mr-3 flex-shrink-0 pt-0.5">
+                        {% if message.tags == 'error' %}
+                            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        {% elif message.tags == 'success' %}
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        {% else %}
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        {% endif %}
+                    </div>
+
+                    <!-- Message Text -->
+                    <div class="flex-1 font-medium leading-relaxed">{{ message }}</div>
+
+                    <!-- Dismiss Button -->
+                    <button type="button" onclick="this.parentElement.remove()" class="ml-2 text-slate-400 hover:text-slate-600 focus:outline-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Page Layout (overridden by child templates) -->
+    {% block layout %}{% endblock %}
+
+    <!--
+        School Default JS: toast auto-dismiss, password toggle, mobile sidebar.
+        Loaded at the bottom so the DOM is ready before any handlers attach.
+    -->
+    <script src="{% static school_main_js %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

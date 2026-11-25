@@ -1,0 +1,198 @@
+{% extends school_layout_template %}
+
+{% block page_title %}{{ assessment.title }} - Overview{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'assessments:assessment_list' %}" class="text-xs font-semibold text-brand-600 hover:underline">&larr; Back to Assessments</a>
+                <span class="text-slate-300">&bull;</span>
+                <span class="text-xs font-semibold text-slate-500">{{ assessment.school_class.name }} &bull; {{ assessment.subject.name }}</span>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 mt-1">{{ assessment.title }}</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'assessments:assessment_take' assessment.id %}"
+                class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-soft transition">
+                Preview CBT Interface &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Stats Card -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Duration</span>
+            <div class="text-lg font-bold text-slate-900 mt-0.5">{{ assessment.duration_minutes }} Mins</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Total Marks</span>
+            <div class="text-lg font-bold text-slate-900 mt-0.5">{{ assessment.total_marks }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Questions Added</span>
+            <div class="text-lg font-bold text-brand-600 mt-0.5">{{ included_questions.count }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Submissions</span>
+            <div class="text-lg font-bold text-emerald-600 mt-0.5">{{ submissions.count }}</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Questions in Assessment (2 cols) -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Questions in this Test</h2>
+                    <span class="text-xs text-slate-400">{{ included_questions|length }} Question(s)</span>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    {% for aq in included_questions %}
+                        <div class="p-5 hover:bg-slate-50/50 transition flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-brand-50 border border-brand-200 text-brand-600 text-xs font-bold flex items-center justify-center shrink-0">
+                                {{ aq.order }}
+                            </span>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                                        {{ aq.question.get_question_type_display }}
+                                    </span>
+                                    <span class="text-[11px] font-semibold text-slate-500">{{ aq.marks }} Mark(s)</span>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-900 leading-relaxed">{{ aq.question.prompt }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="py-12 text-center text-slate-400">
+                            <p class="font-medium text-xs">No questions attached to this assessment yet.</p>
+                            <p class="text-[11px] mt-1">Select questions from your Question Bank on the right.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Student Submissions -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Student Attempts &amp; Results</h2>
+                    <span class="text-xs text-slate-400">{{ submissions|length }} Attempt(s)</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50/30 text-slate-400 uppercase tracking-wider text-[11px]">
+                                <th class="py-3 px-6 font-bold">Student</th>
+                                <th class="py-3 px-6 font-bold">Status</th>
+                                <th class="py-3 px-6 font-bold text-center">Score</th>
+                                <th class="py-3 px-6 font-bold text-center">%</th>
+                                <th class="py-3 px-6 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for sub in submissions %}
+                                <tr class="hover:bg-slate-50/50 transition">
+                                    <td class="py-3.5 px-6 font-bold text-slate-900">
+                                        {{ sub.student.user.get_full_name }}
+                                        <div class="text-[10px] text-slate-400 font-mono">{{ sub.student.admission_number }}</div>
+                                    </td>
+                                    <td class="py-3.5 px-6">
+                                        {% if sub.status == 'marked' %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                Marked
+                                            </span>
+                                        {% elif sub.status == 'submitted' %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                Pending Essay
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                                In Progress
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3.5 px-6 text-center font-bold text-slate-900">
+                                        {{ sub.total_score }} / {{ assessment.total_marks }}
+                                    </td>
+                                    <td class="py-3.5 px-6 text-center font-semibold text-slate-700">
+                                        {{ sub.percentage }}%
+                                    </td>
+                                    <td class="py-3.5 px-6 text-right">
+                                        {% if sub.status == 'submitted' %}
+                                            <a href="{% url 'assessments:marking_queue' sub.id %}"
+                                                class="px-2.5 py-1 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-500 transition">
+                                                Mark Essays &rarr;
+                                            </a>
+                                        {% else %}
+                                            <span class="text-slate-400 text-[11px]">&mdash;</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400">
+                                        No student submissions yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Questions from Bank (1 col) -->
+        <div class="space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">Add From Question Bank</h3>
+                <p class="text-xs text-slate-500 mb-4">Select questions for {{ assessment.subject.name }} to attach to this assessment.</p>
+
+                <div class="space-y-3 max-h-[600px] overflow-y-auto pr-1 divide-y divide-slate-100">
+                    {% for q in available_questions %}
+                        <form method="post" action="{% url 'assessments:assessment_detail' assessment.id %}" class="pt-3 space-y-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="question_id" value="{{ q.id }}">
+
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                                    {{ q.get_question_type_display }}
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" step="0.5" name="marks" value="{{ q.default_marks }}"
+                                        class="w-14 text-[11px] px-1.5 py-0.5 rounded border border-slate-200 text-center font-bold">
+                                    <span class="text-[10px] text-slate-400">marks</span>
+                                </div>
+                            </div>
+
+                            <p class="text-xs font-semibold text-slate-800 line-clamp-2">{{ q.prompt }}</p>
+
+                            <button type="submit"
+                                class="w-full py-1.5 px-3 rounded-lg border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold transition">
+                                + Add to Test
+                            </button>
+                        </form>
+                    {% empty %}
+                        <div class="py-8 text-center text-slate-400 text-xs">
+                            No additional questions available for {{ assessment.subject.name }}.
+                            <div class="mt-2">
+                                <a href="{% url 'assessments:question_list' %}" class="text-brand-600 font-bold hover:underline">
+                                    + Add to Question Bank
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
